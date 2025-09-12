@@ -3,7 +3,7 @@
     <!-- Header -->
     <div
         class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row  items-center justify-between">
             <div>
                 <h1
                     class="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">

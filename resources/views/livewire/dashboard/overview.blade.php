@@ -3,8 +3,8 @@
     <!-- Header com gradiente e sombra -->
     <div
         class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6">
-        <div class="flex items-center justify-between">
-            <div>
+        <div class="flex flex-col md:flex-row items-center justify-between">
+            <div class="flex md:flex-row flex-col md:items-center md:space-x-4 rtl:space-x-reverse">
                 <h1
                     class="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400 bg-clip-text text-transparent">
                     Dashboard
@@ -14,7 +14,7 @@
                 </p>
             </div>
             <a href="{{ route('pos') }}"
-                class="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                class="inline-block px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                 wire:navigate>
                 🛒 Ir para o Caixa
             </a>

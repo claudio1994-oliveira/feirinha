@@ -1,5 +1,5 @@
 <div class="p-6 space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col md:flex-row  items-center justify-between">
         <div>
             <h1 class="text-2xl font-semibold">Gerenciar Feirinha: {{ $fair->name }}</h1>
             <div class="text-sm text-zinc-500">{{ \Carbon\Carbon::parse($fair->event_date)->format('d/m/Y') }}</div>

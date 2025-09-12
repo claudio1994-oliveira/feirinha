@@ -1,5 +1,5 @@
 <div class="p-6 space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col md:flex-row items-center justify-between">
         <h1 class="text-2xl font-semibold">Fechamento do Caixa - {{ $fair?->name ?? 'Sem feirinha' }}</h1>
         <a href="{{ route('pos') }}" class="px-3 py-2 border rounded" wire:navigate>Voltar ao Caixa</a>
     </div>
