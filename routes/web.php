@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Livewire\Fairs\Index as FairsIndex;
-use App\Livewire\Fairs\Create as FairsCreate;
 use App\Livewire\Fairs\Manage as FairsManage;
 use App\Livewire\Cashier\PointOfSale;
 use App\Livewire\Products\Index as ProductsIndex;
@@ -32,13 +31,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Fairs
     Route::get('fairs', FairsIndex::class)->name('fairs.index');
-    Route::get('fairs/create', FairsCreate::class)->name('fairs.create');
     Route::get('fairs/{fair}', FairsManage::class)->name('fairs.manage');
-    Route::post('fairs/{fair}/set-current', function(App\Models\Fair $fair){
-        App\Models\Fair::query()->update(['is_current' => false]);
-        $fair->is_current = true; $fair->save();
-        return back();
-    })->name('fairs.set-current');
 
     // Products
     Route::get('products', ProductsIndex::class)->name('products.index');

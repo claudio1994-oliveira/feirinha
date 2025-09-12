@@ -23,6 +23,12 @@ class PointOfSale extends Component
 
     public ?int $fair_id = null;
 
+    // Novas propriedades para melhor UX
+    public ?int $selected_open_order = null;
+    public bool $show_payment_modal = false;
+    public string $payment_type = 'instant'; // 'instant', 'open_tab', 'close_tab', 'add_to_tab'
+    public Order $order_to_pay;
+
     #[Layout('components.layouts.app')]
     public function mount()
     {
@@ -34,11 +40,11 @@ class PointOfSale extends Component
     {
         $fp = FairProduct::with('product')->findOrFail($fairProductId);
         if ($fp->sold_out) {
-            $this->dispatch('notify', message: 'Produto esgotado e removido do carrinho.');
+            $this->dispatch('notify', message: 'Produto esgotado.', type: 'error');
             return;
         }
         if (!is_null($fp->quantity) && $fp->sold >= $fp->quantity) {
-            $this->dispatch('notify', message: 'Produto esgotado e removido do carrinho.');
+            $this->dispatch('notify', message: 'Produto esgotado.', type: 'error');
             return;
         }
 
@@ -55,11 +61,14 @@ class PointOfSale extends Component
             $this->cart[$key]['qty'] += 1;
             $this->cart[$key]['subtotal'] = $this->cart[$key]['qty'] * $this->cart[$key]['price'];
         }
+
+        $this->dispatch('notify', message: $fp->product->name . ' adicionado ao carrinho!', type: 'success');
     }
 
     public function removeFromCart(int $index)
     {
-        array_splice($this->cart, $index, 1);
+        unset($this->cart[$index]);
+        $this->cart = array_values($this->cart); // Reindexar array
     }
 
     public function updateQty(int $index, int $qty)
@@ -74,31 +83,63 @@ class PointOfSale extends Component
         return collect($this->cart)->sum('subtotal');
     }
 
-    public function checkout(bool $openTab = false)
+    public function clearCart()
     {
-        if (!$this->fair_id) {
-            $this->dispatch('notify', message: 'Nenhuma feirinha atual definida.');
+        $this->cart = [];
+        $this->payment_method = null;
+        $this->customer_id = null;
+    }
+
+    // Novo método para iniciar processo de pagamento
+    public function startPayment($type = 'instant')
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('notify', message: 'Carrinho vazio!', type: 'error');
             return;
         }
-        if (!$openTab) {
-            $this->validate();
+
+        $this->payment_type = $type;
+        $this->show_payment_modal = true;
+        $this->resetErrorBag();
+    }
+
+    // Processar pagamento instantâneo ou abrir conta
+    public function processPayment()
+    {
+        if ($this->payment_type === 'add_to_tab') {
+            $this->processAddToOrder();
+            return;
+        }
+
+        if (!$this->fair_id) {
+            $this->dispatch('notify', message: 'Nenhuma feirinha atual definida.', type: 'error');
+            return;
+        }
+
+        if ($this->payment_type === 'instant') {
+            $this->validate(['payment_method' => 'required|in:cash,pix,card']);
+        } else {
+            // Para conta em aberto, payment_method não é obrigatório
+            $this->validate(['customer_id' => 'nullable|exists:customers,id']);
         }
 
         $order = Order::create([
             'fair_id' => $this->fair_id,
-            'customer_id' => $openTab ? $this->customer_id : null,
-            'status' => $openTab ? 'open' : 'paid',
-            'payment_method' => $openTab ? null : $this->payment_method,
+            'customer_id' => $this->payment_type === 'open_tab' ? $this->customer_id : null,
+            'status' => $this->payment_type === 'instant' ? 'paid' : 'open',
+            'payment_method' => $this->payment_type === 'instant' ? $this->payment_method : null,
             'total' => $this->total,
         ]);
 
         foreach ($this->cart as $item) {
             $fp = FairProduct::find($item['fair_product_id']);
-            // Verificar estoque
+
+            // Verificar estoque novamente
             if ($fp->sold_out || (!is_null($fp->quantity) && $fp->sold + $item['qty'] > $fp->quantity)) {
-                // remove item do carrinho
+                $this->dispatch('notify', message: $fp->product->name . ' não tem estoque suficiente.', type: 'error');
                 continue;
             }
+
             OrderItem::create([
                 'order_id' => $order->id,
                 'fair_product_id' => $item['fair_product_id'],
@@ -114,30 +155,109 @@ class PointOfSale extends Component
             $fp->save();
         }
 
-        // Enviar e-mail quando a venda for concluída e cliente tiver email
-        if (!$openTab && $order->customer && $order->customer->email) {
+        // Enviar e-mail para pagamento instantâneo
+        if ($this->payment_type === 'instant' && $order->customer && $order->customer->email) {
             $order->load(['items.fairProduct.product']);
             Mail::to($order->customer->email)->send(new OrderReceipt($order));
         }
 
-        $this->cart = [];
-        $this->payment_method = null;
+        $message = $this->payment_type === 'instant' ? 'Venda finalizada com sucesso!' : 'Conta aberta para o cliente!';
+        $this->dispatch('notify', message: $message, type: 'success');
 
-        $this->dispatch('notify', message: $openTab ? 'Conta aberta para o cliente.' : 'Venda concluída!');
+        $this->clearCart();
+        $this->show_payment_modal = false;
     }
 
-    public function payOpenOrder(int $orderId)
+    public function cancelPayment()
     {
-        $order = Order::where('status', 'open')->with(['items.fairProduct.product','customer'])->findOrFail($orderId);
-        $this->validate();
-        $order->update([
+        $this->show_payment_modal = false;
+        $this->resetErrorBag();
+    }
+
+    // Selecionar conta aberta para pagamento
+    public function selectOpenOrder($orderId)
+    {
+        $this->order_to_pay = Order::findOrFail($orderId);
+        $this->payment_type = 'close_tab';
+        $this->payment_method = ''; // Reset payment method
+        $this->show_payment_modal = true;
+    }
+
+    public function addToOpenOrder($orderId)
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('notify', message: 'Carrinho vazio. Adicione produtos primeiro.', type: 'error');
+            return;
+        }
+
+        $this->order_to_pay = Order::findOrFail($orderId);
+        $this->payment_type = 'add_to_tab';
+        $this->show_payment_modal = true;
+    }
+
+    public function processAddToOrder()
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('notify', message: 'Carrinho vazio.', type: 'error');
+            return;
+        }
+
+        foreach ($this->cart as $item) {
+            $fp = FairProduct::find($item['fair_product_id']);
+
+            // Verificar estoque
+            if ($fp->sold_out || (!is_null($fp->quantity) && $fp->sold + $item['qty'] > $fp->quantity)) {
+                $this->dispatch('notify', message: $fp->product->name . ' não tem estoque suficiente.', type: 'error');
+                continue;
+            }
+
+            OrderItem::create([
+                'order_id' => $this->order_to_pay->id,
+                'fair_product_id' => $item['fair_product_id'],
+                'quantity' => $item['qty'],
+                'unit_price' => $item['price'],
+                'subtotal' => $item['subtotal'],
+            ]);
+
+            $fp->sold += $item['qty'];
+            if (!is_null($fp->quantity) && $fp->sold >= $fp->quantity) {
+                $fp->sold_out = true;
+            }
+            $fp->save();
+        }
+
+        // Atualizar total da conta
+        $this->order_to_pay->update([
+            'total' => $this->order_to_pay->total + $this->total
+        ]);
+
+        $this->dispatch('notify', message: 'Produtos adicionados à conta #' . $this->order_to_pay->id . '!', type: 'success');
+
+        $this->clearCart();
+        $this->show_payment_modal = false;
+        $this->resetErrorBag();
+    }
+
+    // Fechar conta aberta
+    public function closeOpenOrder()
+    {
+        $this->validate(['payment_method' => 'required|in:cash,pix,card']);
+
+        $this->order_to_pay->update([
             'status' => 'paid',
             'payment_method' => $this->payment_method,
         ]);
-        if ($order->customer && $order->customer->email) {
-            Mail::to($order->customer->email)->send(new OrderReceipt($order));
+
+        if ($this->order_to_pay->customer && $this->order_to_pay->customer->email) {
+            Mail::to($this->order_to_pay->customer->email)->send(new OrderReceipt($this->order_to_pay));
         }
-        $this->dispatch('notify', message: 'Conta fechada com sucesso.');
+
+        $this->dispatch('notify', message: 'Conta #' . $this->order_to_pay->id . ' fechada com sucesso!', type: 'success');
+
+        $this->show_payment_modal = false;
+        $this->selected_open_order = null;
+        $this->payment_method = null;
+        $this->resetErrorBag();
     }
 
     public function render()
@@ -151,8 +271,14 @@ class PointOfSale extends Component
             ->where('sold_out', false)
             ->get();
 
-        $openOrders = Order::where('fair_id', $this->fair_id)->where('status', 'open')->with('customer')->latest()->get();
+        $openOrders = Order::where('fair_id', $this->fair_id)
+            ->where('status', 'open')
+            ->with('customer')
+            ->latest()
+            ->get();
 
-        return view('livewire.cashier.pos', compact('fair', 'menu', 'openOrders'));
+        $customers = Customer::orderBy('name')->get();
+
+        return view('livewire.cashier.pos', compact('fair', 'menu', 'openOrders', 'customers'));
     }
 }
