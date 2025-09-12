@@ -5,7 +5,6 @@
             <h1 class="text-2xl font-bold">Ponto de Venda</h1>
             <p class="text-sm text-gray-600 dark:text-gray-400">
                 {{ $fair?->name ?? '' }} @if ($payment_type !== 'open_tab' && $payment_type !== 'add_to_tab')
-                    'Nenhuma feirinha ativa'
                 @endif
                 <button wire:click="{{ $payment_type === 'close_tab' ? 'closeOpenOrder' : 'processPayment' }}"
                     class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
