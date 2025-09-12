@@ -367,30 +367,69 @@
             const moonIconMobile = document.getElementById('moon-icon-mobile');
 
             if (isDark) {
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-                sunIconMobile.classList.remove('hidden');
-                moonIconMobile.classList.add('hidden');
+                sunIcon?.classList.remove('hidden');
+                moonIcon?.classList.add('hidden');
+                sunIconMobile?.classList.remove('hidden');
+                moonIconMobile?.classList.add('hidden');
             } else {
-                sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden');
-                sunIconMobile.classList.add('hidden');
-                moonIconMobile.classList.remove('hidden');
+                sunIcon?.classList.add('hidden');
+                moonIcon?.classList.remove('hidden');
+                sunIconMobile?.classList.add('hidden');
+                moonIconMobile?.classList.remove('hidden');
             }
         }
 
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializeTheme() {
             const savedTheme = localStorage.getItem('theme');
             const html = document.getElementById('html-root');
 
+            // Se o usuário já escolheu um tema, use sempre essa preferência
             if (savedTheme === 'light') {
                 html.classList.remove('dark');
-            } else {
+            } else if (savedTheme === 'dark') {
                 html.classList.add('dark');
+            } else {
+                // Se não há tema salvo, use a preferência do sistema
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (systemPrefersDark) {
+                    html.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    html.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
             }
 
             updateThemeIcons();
+        }
+
+        // Initialize theme immediately (before DOMContentLoaded)
+        initializeTheme();
+
+        // Also initialize when DOM is loaded (safety fallback)
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+        });
+
+        // Re-initialize theme on Livewire navigation (for SPA-like behavior)
+        document.addEventListener('livewire:navigated', function() {
+            initializeTheme();
+        });
+
+        // Listen for system theme changes and only apply if user hasn't manually chosen
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            const savedTheme = localStorage.getItem('theme');
+
+            // Only apply system changes if user hasn't manually set a preference
+            if (!savedTheme) {
+                const html = document.getElementById('html-root');
+                if (e.matches) {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+                updateThemeIcons();
+            }
         });
     </script>
 
