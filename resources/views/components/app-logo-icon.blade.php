@@ -1,8 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 42" {{ $attributes }}>
-    <path 
-        fill="currentColor" 
-        fill-rule="evenodd" 
-        clip-rule="evenodd"
-        d="M17.2 5.633 8.6.855 0 5.633v26.51l16.2 9 16.2-9v-8.442l7.6-4.223V9.856l-8.6-4.777-8.6 4.777V18.3l-5.6 3.111V5.633ZM38 18.301l-5.6 3.11v-6.157l5.6-3.11V18.3Zm-1.06-7.856-5.54 3.078-5.54-3.079 5.54-3.078 5.54 3.079ZM24.8 18.3v-6.157l5.6 3.111v6.158L24.8 18.3Zm-1 1.732 5.54 3.078-13.14 7.302-5.54-3.078 13.14-7.3v-.002Zm-16.2 7.89 7.6 4.222V38.3L2 30.966V7.92l5.6 3.111v16.892ZM8.6 9.3 3.06 6.222 8.6 3.143l5.54 3.08L8.6 9.3Zm21.8 15.51-13.2 7.334V38.3l13.2-7.334v-6.156ZM9.6 11.034l5.6-3.11v14.6l-5.6 3.11v-14.6Z"
-    />
+    <!-- Mapa do Brasil (simplificado) -->
+    <path fill="currentColor" fill-rule="evenodd"
+        d="M12 8c-2 0-4 1-5 3-1 1-1 3 0 5l1 2c0 1 1 2 2 3l2 3c1 2 2 3 4 3h4c1 0 2-1 3-2l2-3c1-1 1-2 1-3l1-3c0-1 0-2-1-3-1-2-3-4-5-4h-9z" />
+    <!-- Tocha/Chama (Espírito Santo) -->
+    <path fill="currentColor" d="M20 2c-1 0-2 1-2 2 0 2 1 3 2 4 1-1 2-2 2-4 0-1-1-2-2-2z" />
+    <path fill="currentColor" d="M18 4c0 1 1 2 2 3 1-1 2-2 2-3-1-1-2-1-4 0z" />
+    <!-- Bíblia (Evangelho) -->
+    <rect x="14" y="28" width="12" height="10" fill="currentColor" rx="1" />
+    <line x1="16" y1="31" x2="24" y2="31" stroke="white" stroke-width="0.5" />
+    <line x1="16" y1="33" x2="24" y2="33" stroke="white" stroke-width="0.5" />
+    <line x1="16" y1="35" x2="22" y2="35" stroke="white" stroke-width="0.5" />
 </svg>

@@ -12,7 +12,7 @@ use App\Livewire\Public\Menu as PublicMenu;
 use App\Livewire\Users\Index as UsersIndex;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 })->name('home');
 
 // Página pública do cardápio da feirinha atual
