@@ -161,7 +161,8 @@ class PointOfSale extends Component
             Mail::to($order->customer->email)->send(new OrderReceipt($order));
         }
 
-        $message = $this->payment_type === 'instant' ? 'Venda finalizada com sucesso!' : 'Conta aberta para o cliente!';
+        $message = $this->payment_type === 'instant' ? 'Venda finalizada com sucesso!' :
+                   ($this->customer_id ? 'Conta aberta para ' . $order->customer->name . '!' : 'Conta aberta (cliente avulso)!');
         $this->dispatch('notify', message: $message, type: 'success');
 
         $this->clearCart();

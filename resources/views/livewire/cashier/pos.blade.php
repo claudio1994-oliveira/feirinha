@@ -158,16 +158,25 @@
                         @foreach ($openOrders as $order)
                             <div
                                 class="border rounded-lg p-4 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-                                <div class="flex items-start justify-between mb-2">
-                                    <div>
-                                        <div class="font-semibold text-sm">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-sm text-gray-800 dark:text-gray-200">
                                             Conta #{{ $order->id }}
                                         </div>
-                                        <div class="text-sm text-gray-600 dark:text-gray-400">
-                                            {{ $order->customer?->name ?? 'Cliente avulso' }}
+                                        <div class="font-medium text-base text-gray-900 dark:text-white">
+                                            @if ($order->customer)
+                                                👤 {{ $order->customer->name }}
+                                                @if ($order->customer->phone)
+                                                    <div class="text-xs text-gray-600 dark:text-gray-400">
+                                                        📞 {{ $order->customer->phone }}
+                                                    </div>
+                                                @endif
+                                            @else
+                                                🎯 Cliente avulso
+                                            @endif
                                         </div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ $order->created_at->format('d/m H:i') }}
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            Aberta em: {{ $order->created_at->format('d/m H:i') }}
                                         </div>
                                     </div>
                                     <div class="text-right">
@@ -235,13 +244,27 @@
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Cliente (opcional)</label>
-                            <select wire:model="customer_id" class="w-full border rounded-lg px-3 py-2">
+                            <label class="block text-sm font-medium mb-2">
+                                Cliente <span class="text-gray-500">(opcional)</span>
+                            </label>
+                            <select wire:model="customer_id"
+                                class="w-full border rounded-lg px-3 py-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="">Cliente avulso</option>
                                 @foreach ($customers as $customer)
-                                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                    <option value="{{ $customer->id }}">
+                                        {{ $customer->name }}
+                                        @if ($customer->phone)
+                                            - {{ $customer->phone }}
+                                        @endif
+                                        @if ($customer->email)
+                                            - {{ $customer->email }}
+                                        @endif
+                                    </option>
                                 @endforeach
                             </select>
+                            <div class="mt-2 text-xs text-gray-500">
+                                💡 Selecione um cliente para facilitar o controle de contas em aberto
+                            </div>
                         </div>
                     @elseif($payment_type === 'add_to_tab')
                         <h2 class="text-lg font-semibold mb-4">🛒 Adicionar à Conta #{{ $order_to_pay->id }}</h2>

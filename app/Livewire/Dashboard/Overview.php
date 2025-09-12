@@ -52,12 +52,24 @@ class Overview extends Component
             ->limit(5)
             ->get();
 
-        // Distribuição por hora (SQLite)
+        // Distribuição por hora (compatível com MySQL e SQLite)
+        $driverName = DB::connection()->getDriverName();
+        
+        if ($driverName === 'mysql') {
+            $hourExpression = "HOUR(created_at)";
+        } else {
+            $hourExpression = "strftime('%H', created_at)";
+        }
+        
         $byHour = DB::table('orders')
-            ->select(DB::raw("strftime('%H', created_at) as hour"), DB::raw('COUNT(*) as count'), DB::raw('SUM(total) as total'))
+            ->select(
+                DB::raw("{$hourExpression} as hour"), 
+                DB::raw('COUNT(*) as count'), 
+                DB::raw('SUM(total) as total')
+            )
             ->where('fair_id', $this->fair_id)
             ->where('status', 'paid')
-            ->groupBy(DB::raw("strftime('%H', created_at)"))
+            ->groupBy(DB::raw($hourExpression))
             ->orderBy('hour')
             ->get();
 
