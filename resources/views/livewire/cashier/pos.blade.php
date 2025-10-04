@@ -1,5 +1,5 @@
 <div
-    class="min-h-screen bg-gradient-to-br from-[#fff7ed] via-[#fef3c7] to-[#fed7aa] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
+    class="min-h-screen h-screen bg-gradient-to-br from-[#fff7ed] via-[#fef3c7] to-[#fed7aa] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 flex flex-col">
     <!-- Header -->
     <div
         class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6 mb-8">
@@ -31,11 +31,11 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-8 flex-1 h-full">
         <!-- Menu de Produtos (2 colunas) -->
-        <div class="xl:col-span-2">
+        <div class="xl:col-span-2 h-full flex flex-col">
             <div
-                class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6">
+                class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6 flex-1 h-full flex flex-col">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg">
                         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -106,9 +106,9 @@
         </div>
 
         <!-- Carrinho de Compras -->
-        <div class="xl:col-span-1">
+        <div class="xl:col-span-1 h-full flex flex-col">
             <div
-                class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6">
+                class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6 flex-1 h-full flex flex-col">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg">
                         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -120,7 +120,7 @@
                 </div>
 
                 @if (!empty($cart))
-                    <div class="space-y-3 mb-6 max-h-60 overflow-y-auto">
+                    <div class="space-y-3 mb-6 flex-1 h-full overflow-y-auto">
                         @foreach ($cart as $i => $item)
                             <div
                                 class="group bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl p-4 hover:from-orange-50 hover:to-red-50 dark:hover:from-orange-900/20 dark:hover:to-red-900/20 transition-all duration-300">
@@ -202,9 +202,8 @@
         </div>
 
         <!-- Contas Abertas -->
-        <div class="xl:col-span-1">
-            <div
-                class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6">
+        <div class="xl:col-span-1 h-full flex flex-col">
+            <div class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6 flex-1 h-full flex flex-col">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg">
                         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -218,7 +217,7 @@
                 </div>
 
                 @if ($openOrders->count() > 0)
-                    <div class="space-y-4 max-h-80 overflow-y-auto">
+                    <div class="space-y-4 flex-1 h-full overflow-y-auto">
                         @foreach ($openOrders as $order)
                             <div
                                 class="group bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 hover:from-amber-100 hover:to-yellow-100 dark:hover:from-amber-900/30 dark:hover:to-yellow-900/30 transition-all duration-300">
